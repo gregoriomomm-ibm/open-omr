@@ -1,0 +1,79 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: grader-flask-deployment
+spec:
+  selector:
+    matchLabels:
+      app: grader-flask
+      release: 1.0.0
+  replicas: 1        
+  template:
+    metadata:
+      labels:
+        app: grader-flask
+        release: 1.0.0
+    spec:
+      containers:
+      - name: grader
+        image: gmommoutlook/grader:slim-flask-1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            memory: 1G
+          requests:
+            memory: 512Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grader-flask-service
+  labels:
+    app: grader-flask
+    release: 1.0.0
+  annotations:
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+      name: grader
+  selector:
+    app: grader-flask
+    release: 1.0.0
+
+---
+
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.bluemix.net/redirect-to-https: "True"
+    ingress.bluemix.net/rewrite-path: "serviceName=grader-service rewrite=/"
+    ingress.bluemix.net/client-max-body-size: "serviceName=<myservice> size=10M; size=10M"
+  name: grader-flask-ingress
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+              #      - backend:
+              #          serviceName: grader-service
+              #          servicePort: 5000
+              #        path: /omr/
+      - backend:
+          serviceName: grader-flask-service
+          servicePort: 5000
+        path: /
+    host: grader-flask.legal.sao01.containers.appdomain.cloud   
+  tls:
+  - secretName: tlssecret
+    hosts:
+    - grader-flask.legal.sao01.containers.appdomain.cloud
+    

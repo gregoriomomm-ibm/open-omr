@@ -1,0 +1,61 @@
+FROM python:3.7-slim
+
+LABEL maintainer="Gregorio Elias Roecker Momm (gregoriomomm@gmail.com)"
+
+ARG BUILD_PACKAGES1="   \
+    build-essential     \
+    curl                \
+    apt-utils           "
+
+ARG BUILD_PACKAGES2="   \
+    libzbar0            \
+    zlib1g-dev          \
+    libopencv-dev       \
+    python-opencv       "
+
+# && apt-get upgrade  -y \
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends $BUILD_PACKAGES1 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /tmp/workdir/* 
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends $BUILD_PACKAGES2 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /tmp/workdir/* 
+
+RUN pip3 install --upgrade pip \
+ && pip3 install numpy scipy setuptools 
+
+RUN pip3 install opencv-python imutils pyzbar
+
+RUN pip3 install flask flask-cors flask-swagger swagger-ui-py
+
+RUN pip3 install gunicorn
+
+
+RUN mkdir -p /tmp/workdir
+WORKDIR /tmp/workdir
+ 
+#************************************************************************************************************************#
+##########################################################################################################################
+#************************************************************************************************************************#
+
+# Add demo app
+COPY ./app /app
+WORKDIR /app
+
+# Make /app/* available 
+ENV PYTHONPATH=/app
+
+# Run the start script provided by the parent image tiangolo/uwsgi-nginx.
+# It will check for an /app/prestart.sh script (e.g. for migrations)
+# And then will start Supervisor, which in turn will start Nginx and uWSGI
+
+EXPOSE 5000
+
+# CMD ["/usr/local/bin/python3","./grader-flask.py"]
+CMD ["/usr/local/bin/gunicorn","-b", "0.0.0.0:5000","grader-flask:api"]

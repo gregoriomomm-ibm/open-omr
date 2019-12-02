@@ -1,0 +1,75 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: grader-deployment
+spec:
+  selector:
+    matchLabels:
+      app: grader
+      release: 1.0.0
+  replicas: 1        
+  template:
+    metadata:
+      labels:
+        app: grader
+        release: 1.0.0
+    spec:
+      containers:
+      - name: grader
+        image: gmommoutlook/grader:slim-1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grader-service
+  labels:
+    app: grader
+    release: 1.0.0
+  annotations:
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30001
+      protocol: TCP
+      name: grader
+  selector:
+    app: grader
+    release: 1.0.0
+
+---
+
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.bluemix.net/redirect-to-https: "True"
+    ingress.bluemix.net/rewrite-path: "serviceName=grader-service rewrite=/"
+    
+  name: grader-ingress
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: grader-service
+          servicePort: 5000
+        path: /omr/
+      - backend:
+          serviceName: grader-service
+          servicePort: 5000
+        path: /
+#    host: grader.container.sao01.containers.appdomain.cloud   
+  tls:
+  - secretName: tlssecret
+#    hosts:
+#    - grader.container.sao01.containers.appdomain.cloud
+    

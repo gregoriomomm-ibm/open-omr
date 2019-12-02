@@ -1,0 +1,30 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.bluemix.net/redirect-to-https: "True"
+    ingress.bluemix.net/rewrite-path: "serviceName=grader-service rewrite=/"
+#    ingress.bluemix.net/appid-auth: "bindSecret=binding-bribm1graderaid001 namespace=default requestType=web serviceName=grader-service; bindSecret=binding-bribm1graderaid001 namespace=default requestType=api serviceName=grader-service"
+  name: grader-ingress
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: grader-service
+          servicePort: 5000
+        path: /omr/
+      - backend:
+          serviceName: grader-service
+          servicePort: 5000
+        path: /
+#    host: grader.container.sao01.containers.appdomain.cloud   
+  tls:
+  - secretName: tlssecret
+#    hosts:
+#    - grader.container.sao01.containers.appdomain.cloud

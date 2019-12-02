@@ -1,0 +1,35 @@
+FROM python:3.7-alpine3.10
+
+LABEL maintainer="Gregorio Elias Roecker Momm (gregoriomomm@gmail.com)"
+
+RUN apk add --no-cache curl bash \
+    gcc musl-dev autoconf libffi-dev gmp-dev \
+    libxml2 libxslt-dev jpeg-dev zlib-dev \
+    build-base python3-dev linux-headers
+
+RUN apk add zbar-dev --update-cache --repository \
+    http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+    
+RUN pip3 install opencv-python imutils flask pyzbar numpy scipy pyzbar
+
+# Add demo app
+COPY ./app /app
+WORKDIR /app
+
+# Make /app/* available to be imported by Python globally to better support several use cases like Alembic migrations.
+ENV PYTHONPATH=/app
+
+# Move the base entrypoint to reuse it
+# RUN mv /entrypoint.sh /old-entrypoint.sh
+# Copy the entrypoint that will generate Nginx additional configs
+# COPY entrypoint.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
+# ENTRYPOINT ["/entrypoint.sh"]
+
+# Run the start script provided by the parent image tiangolo/uwsgi-nginx.
+# It will check for an /app/prestart.sh script (e.g. for migrations)
+# And then will start Supervisor, which in turn will start Nginx and uWSGI
+
+EXPOSE 5000
+
+CMD ["/usr/local/bin/python3 /app/grader.py"]
