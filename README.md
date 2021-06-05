@@ -2,9 +2,9 @@
 
 ## Showing what the algorithm does
 
-![original picture](https://github.ibm.com/shared-assets/grader/blob/master/test/images/test-01.jpg)
+![original picture](/blob/master/test/images/test-01.jpg)
 
-![after processing](https://github.ibm.com/shared-assets/grader/blob/master/test/output/test-01.jpg)
+![after processing](/blob/master/test/output/test-01.jpg)
 
 OMR kind of image recognition
 
