@@ -2,9 +2,9 @@
 
 ## Showing what the algorithm does
 
-![original picture](/blob/master/test/images/test-01.jpg)
+![original picture](/test/images/test-01.jpg)
 
-![after processing](/blob/master/test/output/test-01.jpg)
+![after processing](/test/output/test-01.jpg)
 
 OMR kind of image recognition
 
